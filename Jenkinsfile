@@ -44,6 +44,7 @@ pipeline {
                                         terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
                                         terraform init || { echo "Terraform init failed"; exit 1; }
                                         terraform plan || { echo "Terraform plan failed"; exit 1; }
+                                        terraform apply -auto-approve || { echo "Terraform apply failed"; exit 1; }
                                     else
                                         echo "No Terraform configuration found in ${dir}"
                                     fi
