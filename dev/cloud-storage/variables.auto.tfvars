@@ -4,7 +4,7 @@ cloud_storage = [
 
   {
     project_id = "axisroom-poc-01"
-    name       = "bucket-dev-ag"
+    name       = "bucket-dev-jenkins"
     location   = "asia-south1"
     versioning = true
     public_access_prevention = "inherited"
