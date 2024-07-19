@@ -167,6 +167,7 @@ pipeline {
             steps {
                 // Approval input with security policy
                 script {
+                    echo "Current branch: ${env.BRANCH_NAME}"
                     def inputResponse = input message: 'Proceed with Approval Stage?',
                                         submitterParameter: 'APPROVER',
                                         submitter: 'wiai-approver',
@@ -175,6 +176,8 @@ pipeline {
                     def approval = inputResponse['APPROVAL']
                     // Extract user who approved
                     def approver = inputResponse['APPROVER']
+                    
+                    echo "Approval: ${approval}, Approver: ${approver}"
                     
                     // Check if the approval was granted by the admin
                     if (approver == 'wiai-approver' && approval && env.BRANCH_NAME == 'jenkins') {
@@ -232,3 +235,4 @@ pipeline {
         }
     }
 }
+
