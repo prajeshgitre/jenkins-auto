@@ -107,6 +107,7 @@
 //         }
 //     }
 // }
+
 pipeline {
     agent any
 
@@ -167,9 +168,9 @@ pipeline {
             steps {
                 // Approval input with security policy
                 script {
-                    // Debug: Print branch name and ensure it's as expected
-                    echo "DEBUG: Current branch name: ${env.BRANCH_NAME}"
-                    assert env.BRANCH_NAME == 'jenkins' : "Expected branch name 'jenkins', but got '${env.BRANCH_NAME}'"
+                    // Set branch name using GIT_BRANCH
+                    def branchName = env.GIT_BRANCH ? env.GIT_BRANCH.replaceFirst(/^origin\//, '') : 'unknown'
+                    echo "DEBUG: Current branch name: ${branchName}"
 
                     def inputResponse = input message: 'Proceed with Approval Stage?',
                                         submitterParameter: 'APPROVER',
@@ -182,10 +183,9 @@ pipeline {
                     
                     // Debug: Print approval and approver information
                     echo "DEBUG: Approval: ${approval}, Approver: ${approver}"
-                    assert approver == 'wiai-approver' : "Expected approver 'wiai-approver', but got '${approver}'"
                     
                     // Check if the approval was granted by the admin
-                    if (approver == 'wiai-approver' && approval && env.BRANCH_NAME == 'jenkins') {
+                    if (approver == 'wiai-approver' && approval && branchName == 'jenkins') {
                         echo 'Approval granted by admin. Proceeding Deploy Stage...'
                     } else {
                         echo 'Approval denied. Only jenkins branch is allowed or not provided by the correct submitter. Stopping the pipeline.'
@@ -240,4 +240,5 @@ pipeline {
         }
     }
 }
+
 
