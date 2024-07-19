@@ -9,5 +9,4 @@ service_accounts_list = [
     project_roles = []
   },
 
-
 ]
