@@ -182,14 +182,14 @@ pipeline {
                     def approver = inputResponse['APPROVER']
                     
                     // Debug: Print approval and approver information
-                    echo "DEBUG: Approval: ${approval}, Approver: ${approver}"
+                    echo "DEBUG: Approval: ${approval}, Approver: ${approver}, Branch: ${branchName}"
                     
                     // Check if the approval was granted by the admin
                     if (approver == 'wiai-approver' && approval && branchName == 'jenkins') {
-                        echo 'Approval granted by admin. Proceeding Deploy Stage...'
+                        echo 'Approval granted by admin. Proceeding to Deploy Stage...'
                     } else {
-                        echo 'Approval denied. Only jenkins branch is allowed or not provided by the correct submitter. Stopping the pipeline.'
-                        error('Approval denied. Only jenkins branch is allowed or not provided by the correct submitter.')
+                        echo "Approval denied. Only 'jenkins' branch is allowed or not provided by the correct submitter. Stopping the pipeline."
+                        error("Approval denied. Only 'jenkins' branch is allowed or not provided by the correct submitter.")
                     }
                 }
             }
@@ -240,5 +240,3 @@ pipeline {
         }
     }
 }
-
-
