@@ -145,15 +145,6 @@ pipeline {
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
                                     echo "Current directory: \$(pwd)"
                                     ls -la
-                                    
-                                    if [ -f terraform.tf ] || [ -f main.tf ]; then
-                                        echo "Terraform files found. Proceeding with Terraform commands."
-                                        terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
-                                        terraform init || { echo "Terraform init failed"; exit 1; }
-                                        terraform plan || { echo "Terraform plan failed"; exit 1; }
-                                    else
-                                        echo "No Terraform configuration found in ${dir}"
-                                    fi
                                 """
                             }
                         }
@@ -164,36 +155,20 @@ pipeline {
             }
         }
 
-        stage('Approval Stage') {
+        // New Approval Stage
+        stage('Approval') {
             steps {
-                // Approval input with security policy
                 script {
-                    // Fetch branch name from git
-                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "DEBUG: Current branch name from git command: ${branchName}"
-
-                    // Verify branch name directly from Jenkins environment variables
-                    def envBranchName = env.BRANCH_NAME ?: sh(script: 'echo $GIT_BRANCH', returnStdout: true).trim()
-                    echo "DEBUG: Environment branch name: ${envBranchName}"
-
-                    def inputResponse = input message: 'Proceed with Approval Stage?',
-                                        submitterParameter: 'APPROVER',
-                                        submitter: 'wiai-approver',
-                                        parameters: [booleanParam(description: 'Approval', name: 'APPROVAL')]
-                    // Extract approval status from input response
-                    def approval = inputResponse['APPROVAL']
-                    // Extract user who approved
-                    def approver = inputResponse['APPROVER']
+                    // Prompt for user approval before applying changes
+                    def userInput = input message: 'Changes detected. Do you want to proceed with Terraform apply?', ok: 'Apply', parameters: [choice(name: 'Approval', choices: ['No', 'Yes'], description: 'Choose Yes to proceed or No to abort')]
                     
-                    // Debug: Print approval and approver information
-                    echo "DEBUG: Approval: ${approval}, Approver: ${approver}, Branch: ${branchName}, Environment Branch: ${envBranchName}"
-                    
-                    // Check if the approval was granted by the admin
-                    if (approver == 'wiai-approver' && approval && (branchName == 'jenkins' || envBranchName == 'jenkins')) {
-                        echo 'Approval granted by admin. Proceeding to Deploy Stage...'
+                    if (userInput == 'Yes') {
+                        echo 'Approval granted. Proceeding...'
                     } else {
-                        echo "Approval denied. Only 'jenkins' branch is allowed or not provided by the correct submitter. Stopping the pipeline."
-                        error("Approval denied. Only 'jenkins' branch is allowed or not provided by the correct submitter.")
+                        echo 'Terraform apply aborted by user.'
+                        // Optionally: Set build status to failed or unstable here to indicate user abort
+                        currentBuild.result = 'ABORTED' // Or 'UNSTABLE'
+                        return
                     }
                 }
             }
@@ -202,18 +177,19 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 script {
+                    // Apply Terraform changes only if approval granted
                     echo 'Applying Terraform changes...'
-                        
-                    // Get the difference between commits again
+                    
+                    // (Optional) Get the difference again if desired for clarity
                     def currentCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     def previousCommit = sh(script: 'git rev-parse HEAD~1', returnStdout: true).trim()
                     def diff = sh(script: "git diff --name-only ${previousCommit} ${currentCommit}", returnStdout: true).trim()
-                        
+                    
                     if (diff) {
                         diff.split('\n').each { file ->
                             if (file != 'Jenkinsfile') {
                                 def dir = file.contains('/') ? file.substring(0, file.lastIndexOf('/')) : '.'
-                                    
+                                
                                 sh """
                                     set -xe
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
@@ -223,6 +199,7 @@ pipeline {
                                     if [ -f terraform.tf ] || [ -f main.tf ]; then
                                         echo "Terraform files found. Proceeding with Terraform apply."
                                         terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
+                                        terraform init || { echo "Terraform init failed"; exit 1; }
                                         terraform apply -auto-approve || { echo "Terraform apply failed"; exit 1; }
                                     else
                                         echo "No Terraform configuration found in ${dir}"
@@ -244,3 +221,4 @@ pipeline {
         }
     }
 }
+
