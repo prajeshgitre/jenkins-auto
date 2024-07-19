@@ -23,7 +23,7 @@
                     def diff = sh(script: "git diff --name-only ${previousCommit} ${currentCommit}", returnStdout: true).trim()
                     
                     if (diff) {
-                        echo "Changed files:\n${diff}"
+                        // echo "Changed files:\n${diff}"
                         
                         diff.split('\n').each { file ->
                             if (file != 'Jenkinsfile') {
@@ -34,11 +34,11 @@
                                 sh """
                                     set -xe
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
-                                    echo "Current directory: \$(pwd)"
+                                    // echo "Current directory: \$(pwd)"
                                     ls -la
                                     
                                     if [ -f terraform.tf ] || [ -f main.tf ]; then
-                                        echo "Terraform files found. Proceeding with Terraform commands."
+                                        //echo "Terraform files found. Proceeding with Terraform commands."
                                         terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
                                         terraform init || { echo "Terraform init failed"; exit 1; }
                                         terraform plan || { echo "Terraform plan failed"; exit 1; }
@@ -91,11 +91,11 @@
                                 sh """
                                     set -xe
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
-                                    echo "Current directory: \$(pwd)"
+                                    // echo "Current directory: \$(pwd)"
                                     ls -la
 
                                     if [ -f terraform.tf ] || [ -f main.tf ]; then
-                                        echo "Terraform files found. Proceeding with Terraform apply."
+                                        // echo "Terraform files found. Proceeding with Terraform apply."
                                         terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
                                         terraform apply -auto-approve || { echo "Terraform apply failed"; exit 1; }
                                     else
