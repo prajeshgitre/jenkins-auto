@@ -34,7 +34,7 @@
                                 sh """
                                     set -xe
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
-                                    // echo "Current directory: \$(pwd)"
+                                    echo "Current directory: \$(pwd)"
                                     ls -la
                                     
                                     if [ -f terraform.tf ] || [ -f main.tf ]; then
