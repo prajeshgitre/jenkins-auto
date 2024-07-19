@@ -6,18 +6,18 @@
         stage('Get Commit Differences') {
             steps {
                 script {
-                    // Print environment information
-                    sh 'echo "Workspace: $WORKSPACE"'
-                    sh 'echo "PATH: $PATH"'
-                    sh 'which git'
-                    sh 'which terraform'
+                    // // Print environment information
+                    // sh 'echo "Workspace: $WORKSPACE"'
+                    // sh 'echo "PATH: $PATH"'
+                    // sh 'which git'
+                    // sh 'which terraform'
                     
                     // Get the commit SHAs
                     def currentCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     def previousCommit = sh(script: 'git rev-parse HEAD~1', returnStdout: true).trim()
                     
-                    echo "Current commit: ${currentCommit}"
-                    echo "Previous commit: ${previousCommit}"
+                    // echo "Current commit: ${currentCommit}"
+                    // echo "Previous commit: ${previousCommit}"
                     
                     // Get the difference between commits
                     def diff = sh(script: "git diff --name-only ${previousCommit} ${currentCommit}", returnStdout: true).trim()
@@ -29,7 +29,7 @@
                             if (file != 'Jenkinsfile') {
                                 def dir = file.contains('/') ? file.substring(0, file.lastIndexOf('/')) : '.'
                                 
-                                echo "Processing directory: ${dir}"
+                                // echo "Processing directory: ${dir}"
                                 
                                 sh """
                                     set -xe
