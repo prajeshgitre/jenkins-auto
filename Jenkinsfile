@@ -168,8 +168,8 @@ pipeline {
             steps {
                 // Approval input with security policy
                 script {
-                    // Set branch name using GIT_BRANCH
-                    def branchName = env.GIT_BRANCH ? env.GIT_BRANCH.replaceFirst(/^origin\//, '') : 'unknown'
+                    // Set branch name using sh command to fetch branch name
+                    def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
                     echo "DEBUG: Current branch name: ${branchName}"
 
                     def inputResponse = input message: 'Proceed with Approval Stage?',
