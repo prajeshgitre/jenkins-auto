@@ -108,7 +108,7 @@
 //     }
 // }
 
-pipeline {
+ pipeline {
     agent any
 
     stages {
@@ -145,6 +145,15 @@ pipeline {
                                     cd "${WORKSPACE}/${dir}" || { echo "Failed to change directory to ${dir}"; exit 1; }
                                     echo "Current directory: \$(pwd)"
                                     ls -la
+                                    
+                                    if [ -f terraform.tf ] || [ -f main.tf ]; then
+                                        echo "Terraform files found. Proceeding with Terraform commands."
+                                        terraform version || { echo "Terraform not found or not in PATH"; exit 1; }
+                                        terraform init || { echo "Terraform init failed"; exit 1; }
+                                        terraform plan || { echo "Terraform plan failed"; exit 1; }
+                                    else
+                                        echo "No Terraform configuration found in ${dir}"
+                                    fi
                                 """
                             }
                         }
@@ -154,6 +163,7 @@ pipeline {
                 }
             }
         }
+
 
         // New Approval Stage
         stage('Approval') {
