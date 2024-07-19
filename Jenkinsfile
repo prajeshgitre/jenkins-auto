@@ -168,9 +168,13 @@ pipeline {
             steps {
                 // Approval input with security policy
                 script {
-                    // Set branch name using sh command to fetch branch name
+                    // Fetch branch name from git
                     def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "DEBUG: Current branch name: ${branchName}"
+                    echo "DEBUG: Current branch name from git command: ${branchName}"
+
+                    // Verify branch name directly from Jenkins environment variables
+                    def envBranchName = env.BRANCH_NAME ?: sh(script: 'echo $GIT_BRANCH', returnStdout: true).trim()
+                    echo "DEBUG: Environment branch name: ${envBranchName}"
 
                     def inputResponse = input message: 'Proceed with Approval Stage?',
                                         submitterParameter: 'APPROVER',
@@ -182,10 +186,10 @@ pipeline {
                     def approver = inputResponse['APPROVER']
                     
                     // Debug: Print approval and approver information
-                    echo "DEBUG: Approval: ${approval}, Approver: ${approver}, Branch: ${branchName}"
+                    echo "DEBUG: Approval: ${approval}, Approver: ${approver}, Branch: ${branchName}, Environment Branch: ${envBranchName}"
                     
                     // Check if the approval was granted by the admin
-                    if (approver == 'wiai-approver' && approval && branchName == 'jenkins') {
+                    if (approver == 'wiai-approver' && approval && (branchName == 'jenkins' || envBranchName == 'jenkins')) {
                         echo 'Approval granted by admin. Proceeding to Deploy Stage...'
                     } else {
                         echo "Approval denied. Only 'jenkins' branch is allowed or not provided by the correct submitter. Stopping the pipeline."
