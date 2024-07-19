@@ -4,16 +4,10 @@ service_accounts_list = [
   {
     project_id    = "axisroom-poc-01"
     prefix        = ""
-    display_name  = "sa-test-prod-65"
-    names         = ["sa-test1"]
+    display_name  = "sa-test-prod-69"
+    names         = ["sa-test1-dev"]
     project_roles = []
   },
-    {
-    project_id    = "axisroom-poc-01"
-    prefix        = ""
-    display_name  = "sa-test-prod-6"
-    names         = ["sa-test"]
-    project_roles = []
-  },
+ 
 
 ]
