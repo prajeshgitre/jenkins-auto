@@ -15,7 +15,7 @@ cloud_storage = [
   },
    {
     project_id = "axisroom-poc-01"
-    name       = "bkt-dev-jenfk-0"
+    name       = "bkt-dev-jenfk-"
     location   = "asia-south1"
     versioning = true
     public_access_prevention = "inherited"
